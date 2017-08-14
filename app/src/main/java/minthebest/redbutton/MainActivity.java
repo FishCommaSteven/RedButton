@@ -11,13 +11,16 @@ import android.support.transition.Transition;
 import android.support.transition.TransitionManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class MainActivity extends AppCompatActivity {
 
     public static final int ANIMATION_TRANSITION_TIME = 500;
-    public static final int ALARM_NOTIFICATION_TIME = 5000;
+    public static final int NOTIFICATION_TIME_LENGTH = 5;
     private Button redBtn;
     private ConstraintLayout rootView;
     private ConstraintSet setAfter;
@@ -29,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
     private TransitionListener transitionListenerOrigin;
     private TransitionListener transitionListenerAfter;
     private Thread thread;
+    private AtomicInteger countDown = new AtomicInteger(NOTIFICATION_TIME_LENGTH);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,15 +52,18 @@ public class MainActivity extends AppCompatActivity {
         runnable = new Runnable() {
             @Override
             public void run() {
-                try {
-                    Thread.sleep(ALARM_NOTIFICATION_TIME);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                } finally {
-                    ringtone.stop();
-                    animationAfter.removeListener(transitionListenerAfter);
-                    animationOrigin.removeListener(transitionListenerOrigin);
+                while (countDown.getAndDecrement() > 0) {
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                        countDown.set(0);
+                    }
                 }
+
+                ringtone.stop();
+                animationOrigin.removeListener(transitionListenerOrigin);
+                animationAfter.removeListener(transitionListenerAfter);
             }
         };
     }
@@ -77,6 +84,9 @@ public class MainActivity extends AppCompatActivity {
         redBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+                countDown.set(NOTIFICATION_TIME_LENGTH);
+
                 if (thread != null && thread.isAlive()) {
                     return;
                 }
@@ -116,7 +126,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        if (thread.isAlive()) {
+        if (thread != null && thread.isAlive()) {
             thread.interrupt();
         }
     }
