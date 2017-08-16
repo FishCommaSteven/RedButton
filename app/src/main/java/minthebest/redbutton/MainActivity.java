@@ -1,5 +1,6 @@
 package minthebest.redbutton;
 
+import android.animation.ObjectAnimator;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -16,6 +17,8 @@ import android.view.View;
 import android.widget.Button;
 
 import java.util.concurrent.atomic.AtomicInteger;
+
+// TODO: LOOK FOR ANIMATOR , LayoutTransition   (ViewGroup.setLayoutTransition())
 
 public class MainActivity extends AppCompatActivity {
 
@@ -44,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
         setupRunnable();
 
         registerListener();
-
+//        ObjectAnimator.ofFloat()
         setupSoundPlayer();
     }
 
